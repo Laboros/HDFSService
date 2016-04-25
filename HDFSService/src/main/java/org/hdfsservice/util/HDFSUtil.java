@@ -1,9 +1,13 @@
 package org.hdfsservice.util;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -78,6 +82,25 @@ public class HDFSUtil {
 		data=outputStream.toString(HDFSConstants.CHARSET.getValue());
 		}
 		return data; 
+	}
+	
+	public static List<String> readDataFromHDFSAsLines(final String hdfsPathToReadFile, final Configuration conf) throws IOException
+	{
+		List<String> lines =null;
+		FileSystem hdfs = FileSystem.get(conf);
+		Path fileReadPath=new Path(hdfsPathToReadFile);
+		if(hdfs.exists(fileReadPath))
+		{
+			lines=new ArrayList<>();
+			
+		FSDataInputStream inputStream=hdfs.open(fileReadPath);
+		BufferedReader reader =new BufferedReader(new InputStreamReader(inputStream, HDFSConstants.CHARSET.getValue()));
+		String line=null;
+		while((line=reader.readLine())!=null){
+			lines.add(line);
+		}
+		}
+		return lines; 
 	}
 	
 
