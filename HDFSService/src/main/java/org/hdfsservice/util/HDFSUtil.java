@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -46,9 +47,11 @@ public class HDFSUtil {
 		FileSystem hdfs = FileSystem.get(conf);
 		
 		Path hdfsFileDestPath = new Path(hdfsDestinationLoc 
-				+ HDFSConstants.FILE_SEPARATOR_VALUE
-				+ localInputFileNameWithLoc);
+				+ HDFSConstants.FILE_SEPARATOR_VALUE.getValue()
+				+ getFileName(localInputFileNameWithLoc));
 
+		if(hdfs.mkdirs(new Path(hdfsDestinationLoc)))
+		{
 		FSDataOutputStream fsdos = hdfs.create(hdfsFileDestPath);
 
 		IOUtils.copyBytes(is, fsdos, conf);
@@ -61,7 +64,9 @@ public class HDFSUtil {
 			fsdos.close();
 			fsdos = null;
 		}
+		}
 		}catch (IOException e) {
+			e.printStackTrace();
 			isFileCreated=Boolean.FALSE;
 		}
 		return isFileCreated;
@@ -91,7 +96,7 @@ public class HDFSUtil {
 		Path fileReadPath=new Path(hdfsPathToReadFile);
 		if(hdfs.exists(fileReadPath))
 		{
-			lines=new ArrayList<>();
+			lines=new ArrayList<String>();
 			
 		FSDataInputStream inputStream=hdfs.open(fileReadPath);
 		BufferedReader reader =new BufferedReader(new InputStreamReader(inputStream, HDFSConstants.CHARSET.getValue()));
@@ -102,6 +107,10 @@ public class HDFSUtil {
 		}
 		return lines; 
 	}
-	
+
+	private static String getFileName(final String input){
+		String[] tokens=StringUtils.splitPreserveAllTokens(input, HDFSConstants.FILE_SEPARATOR_VALUE.getValue());
+		return tokens[tokens.length-1];
+	}
 
 }
