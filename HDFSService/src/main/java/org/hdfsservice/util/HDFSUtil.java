@@ -132,7 +132,7 @@ public class HDFSUtil {
 	 * @throws IOException 
 	 * 
 	 */
-	public static boolean moveHDFSFileToHDFSDestDir(final String hdfsInputFile,final String hdfsDestDir, boolean removeInputLoc,boolean overrideDest,final Configuration conf) throws InvalidArgException, IOException
+	public static boolean moveFilesOnHDFS(final String hdfsInputFile,final String hdfsDestDir, boolean removeInputLoc,boolean overrideDest,final Configuration conf) throws InvalidArgException, IOException
 	{
 		if(!StringUtils.isEmpty(hdfsInputFile) && !StringUtils.isEmpty(hdfsInputFile) && conf!=null)
 		{
