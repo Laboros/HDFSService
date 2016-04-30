@@ -3,9 +3,11 @@ package org.hdfsservice.util;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,8 +140,13 @@ public class HDFSUtil {
 		{
 			FileSystem hdfs=FileSystem.get(conf);
 			
+			
 			final Path inputFilePath=new Path(hdfsInputFile);
 			
+			if(!hdfs.exists(inputFilePath))
+			{
+				throw new FileNotFoundException("The input file:"+hdfsInputFile+" not found");
+			}
 			final Path destDirPath=new Path(hdfsDestDir);
 			//Checking if output path exists or not
 			if(!hdfs.exists(destDirPath))
@@ -160,13 +167,50 @@ public class HDFSUtil {
 				
 				if(isRenamedFileExists)
 				{
-					throw new FileAlreadyExistsException("Renamed File:"+renamedFileName+" is already exists");
+					throw new FileAlreadyExistsException(" Unable to rename file as :"+renamedFileName+"  because file already exists");
 				}
 			}
+			   if(removeInputLoc)
+			   {
 				hdfs.rename(inputFilePath, renamedPath);
+			   }else{
+				InputStream in= hdfs.open(inputFilePath);
+				OutputStream out=hdfs.create(renamedPath);
+				IOUtils.copyBytes(in, out, conf);
+			   }
 		}else{
-			throw new InvalidArgException("invalid input arguments found: hdfsinputloc:"+hdfsInputFile+" hdfsOutputLoc:"+hdfsInputFile+" removeInputLoc:"+removeInputLoc+" conf:"+conf);
+			throw new InvalidArgException("invalid input arguments found: hdfsinputloc:"+hdfsInputFile+" hdfsOutputLoc:"+hdfsDestDir+" removeInputLoc:"+removeInputLoc+" conf:"+conf);
 		}
+		return Boolean.TRUE;
+	}
+	
+	/**
+	 * 
+	 * @param hdfsInputDir
+	 * @param hdfsDestDir
+	 * @param removeInputLoc
+	 * @param overrideDest
+	 * @param conf
+	 * @return TRUE/FALSE : The files moved successfully from one directory to another director
+	 * The method {@link: moveDirFilesOnHDFS} will move files from one directory to another directory
+	 * @throws InvalidArgException 
+	 * @throws IOException 
+	 */
+	
+	public static boolean moveDirFilesOnHDFS(final String hdfsInputDir, final String hdfsDestDir, final boolean removeInputLoc, final boolean overrideDest, final Configuration conf) throws InvalidArgException, IOException
+	{
+		if(!StringUtils.isEmpty(hdfsInputDir) && !StringUtils.isEmpty(hdfsDestDir) && conf!=null)
+		{
+			
+			final FileSystem hdfs=FileSystem.get(conf);
+			
+			final Path hdfsInputDirPath=new Path(hdfsInputDir);
+			final Path hdfsDestDirPath=new Path(hdfsDestDir);
+			
+		}else{
+			throw new InvalidArgException("invalid input arguments found: hdfsinputloc:"+hdfsInputDir+" hdfsOutputLoc:"+hdfsDestDir+" removeInputLoc:"+removeInputLoc+" conf:"+conf);
+		}
+		
 		return Boolean.TRUE;
 	}
 }
