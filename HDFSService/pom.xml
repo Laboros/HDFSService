@@ -33,17 +33,22 @@
 			<artifactId>hadoop-hdfs</artifactId>
 			<version>2.0.0-cdh4.4.0</version>
 		</dependency>
+		<dependency>
+			<groupId>CommonService</groupId>
+			<artifactId>CommonService</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 	</dependencies>
 
-<repositories>
-    <repository>
-      <id>cloudera</id>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-    </repository>
-    <repository>
-      <id>maven</id>
-      <url>http://search.maven.org/</url>
-    </repository>
-  </repositories>
+	<repositories>
+		<repository>
+			<id>cloudera</id>
+			<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+		</repository>
+		<repository>
+			<id>maven</id>
+			<url>http://search.maven.org/</url>
+		</repository>
+	</repositories>
 </project>

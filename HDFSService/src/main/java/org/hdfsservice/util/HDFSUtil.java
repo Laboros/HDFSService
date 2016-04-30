@@ -13,9 +13,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileAlreadyExistsException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+
+import com.commonservice.FileUtil;
+import com.commonservice.exception.InvalidArgException;
+import com.commonservice.util.LoggerUtil;
 
 /**
  * 
@@ -24,6 +29,8 @@ import org.apache.hadoop.io.IOUtils;
  *         perform operations on HDFS
  */
 public class HDFSUtil {
+	
+	private static LoggerUtil logger=new LoggerUtil(HDFSUtil.class);
 
 	/**
 	 * 
@@ -113,4 +120,53 @@ public class HDFSUtil {
 		return tokens[tokens.length-1];
 	}
 
+	/**
+	 * 
+	 * @param hdfsInputFile
+	 * @param hdfsDestDir
+	 * @param removeInputLoc
+	 * @param conf
+	 * @throws InvalidArgException
+	 * @return TRUE/FALSE, TRUE indicates the file was moved successfully.
+	 * This method will use to move hdfs files from one location to another location.
+	 * @throws IOException 
+	 * 
+	 */
+	public static boolean moveHDFSFileToHDFSDestDir(final String hdfsInputFile,final String hdfsDestDir, boolean removeInputLoc,boolean overrideDest,final Configuration conf) throws InvalidArgException, IOException
+	{
+		if(!StringUtils.isEmpty(hdfsInputFile) && !StringUtils.isEmpty(hdfsInputFile) && conf!=null)
+		{
+			FileSystem hdfs=FileSystem.get(conf);
+			
+			final Path inputFilePath=new Path(hdfsInputFile);
+			
+			final Path destDirPath=new Path(hdfsDestDir);
+			//Checking if output path exists or not
+			if(!hdfs.exists(destDirPath))
+			{
+				hdfs.mkdirs(destDirPath);
+			}
+			final String fileName=FileUtil.getFileNameWithExt(hdfsInputFile);
+			
+			final String renamedFileName=hdfsDestDir+HDFSConstants.FILE_SEPARATOR_VALUE.getValue()+fileName;
+			
+			logger.debug("Creating destination file Name: "+renamedFileName);
+			final Path renamedPath=new Path(renamedFileName);
+
+			if(overrideDest){
+				hdfs.deleteOnExit(renamedPath);
+			}else{
+				boolean isRenamedFileExists=hdfs.exists(renamedPath);
+				
+				if(isRenamedFileExists)
+				{
+					throw new FileAlreadyExistsException("Renamed File:"+renamedFileName+" is already exists");
+				}
+			}
+				hdfs.rename(inputFilePath, renamedPath);
+		}else{
+			throw new InvalidArgException("invalid input arguments found: hdfsinputloc:"+hdfsInputFile+" hdfsOutputLoc:"+hdfsInputFile+" removeInputLoc:"+removeInputLoc+" conf:"+conf);
+		}
+		return Boolean.TRUE;
+	}
 }
