@@ -217,7 +217,6 @@ public class HDFSUtil {
 				if(hdfs.isDirectory(hdfsInputDirPath)){
 					FileStatus[] fileStatus=hdfs.listStatus(hdfsInputDirPath, new PathFilter() {
 						
-						@Override
 						public boolean accept(Path path) {
 							// TODO Auto-generated method stub
 							return path.getName().startsWith("_")?Boolean.FALSE:Boolean.TRUE; //ignore _files
