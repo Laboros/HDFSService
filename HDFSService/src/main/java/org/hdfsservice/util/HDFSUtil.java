@@ -56,11 +56,11 @@ public class HDFSUtil {
 		
 		InputStream is = new FileInputStream(localInputFileNameWithLoc);
 
-		FileSystem hdfs = FileSystem.get(conf);
+		FileSystem hdfs = getFileSystem(conf);
 		
 		Path hdfsFileDestPath = new Path(hdfsDestinationLoc 
 				+ HDFSConstants.FILE_SEPARATOR_VALUE.getValue()
-				+ getFileName(localInputFileNameWithLoc));
+				+ FileUtil.getOnlyFileName(localInputFileNameWithLoc));
 
 		if(hdfs.mkdirs(new Path(hdfsDestinationLoc)))
 		{
@@ -76,6 +76,8 @@ public class HDFSUtil {
 			fsdos.close();
 			fsdos = null;
 		}
+		}else{
+			isFileCreated=Boolean.FALSE;
 		}
 		}catch (IOException e) {
 			e.printStackTrace();
@@ -86,7 +88,7 @@ public class HDFSUtil {
 	
 	public static String readDataFromHDFS(final String hdfsPathToReadFile, final Configuration conf) throws IOException
 	{
-		FileSystem hdfs = FileSystem.get(conf);
+		FileSystem hdfs = getFileSystem(conf);
 		Path fileReadPath=new Path(hdfsPathToReadFile);
 		String data=null;
 		if(hdfs.exists(fileReadPath))
@@ -104,7 +106,7 @@ public class HDFSUtil {
 	public static List<String> readDataFromHDFSAsLines(final String hdfsPathToReadFile, final Configuration conf) throws IOException
 	{
 		List<String> lines =null;
-		FileSystem hdfs = FileSystem.get(conf);
+		FileSystem hdfs = getFileSystem(conf);
 		Path fileReadPath=new Path(hdfsPathToReadFile);
 		if(hdfs.exists(fileReadPath))
 		{
@@ -118,11 +120,6 @@ public class HDFSUtil {
 		}
 		}
 		return lines; 
-	}
-
-	private static String getFileName(final String input){
-		String[] tokens=StringUtils.splitPreserveAllTokens(input, HDFSConstants.FILE_SEPARATOR_VALUE.getValue());
-		return tokens[tokens.length-1];
 	}
 
 	/**
@@ -141,7 +138,7 @@ public class HDFSUtil {
 	{
 		if(!StringUtils.isEmpty(hdfsInputFile) && !StringUtils.isEmpty(hdfsInputFile) && conf!=null)
 		{
-			FileSystem hdfs=FileSystem.get(conf);
+			FileSystem hdfs=getFileSystem(conf);
 			
 			
 			final Path inputFilePath=new Path(hdfsInputFile);
@@ -206,7 +203,7 @@ public class HDFSUtil {
 		if(!StringUtils.isEmpty(hdfsInputDir) && !StringUtils.isEmpty(hdfsDestDir) && conf!=null)
 		{
 			
-			final FileSystem hdfs=FileSystem.get(conf);
+			final FileSystem hdfs=getFileSystem(conf);
 			
 			final Path hdfsInputDirPath=new Path(hdfsInputDir);
 //			final Path hdfsDestDirPath=new Path(hdfsDestDir);
@@ -247,5 +244,22 @@ public class HDFSUtil {
 		}
 		
 		return isDirFilesMoved;
+	}
+	
+	public static boolean mkdirs(final String hdfsDirs, boolean isOverWrite, final Configuration conf)
+	{
+		
+		
+		return Boolean.FALSE;
+	}
+	
+	public static FileSystem getFileSystem(final Configuration conf) throws IOException
+	{
+		FileSystem fileSystem=null;
+		if(null!=conf)
+		{
+			fileSystem=FileSystem.get(conf);
+		}
+		return fileSystem;
 	}
 }
