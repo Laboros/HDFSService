@@ -61,8 +61,10 @@ public class HDFSUtil {
 		Path hdfsFileDestPath = new Path(hdfsDestinationLoc 
 				+ HDFSConstants.FILE_SEPARATOR_VALUE.getValue()
 				+ FileUtil.getOnlyFileName(localInputFileNameWithLoc));
+		
+		boolean isDirsExists=checkNCreateDirs(hdfsDestinationLoc, conf);
 
-		if(hdfs.mkdirs(new Path(hdfsDestinationLoc)))
+		if(isDirsExists)
 		{
 		FSDataOutputStream fsdos = hdfs.create(hdfsFileDestPath);
 
@@ -147,12 +149,12 @@ public class HDFSUtil {
 			{
 				throw new FileNotFoundException("The input file:"+hdfsInputFile+" not found");
 			}
-			final Path destDirPath=new Path(hdfsDestDir);
-			//Checking if output path exists or not
-			if(!hdfs.exists(destDirPath))
+			
+			boolean checkOrCreateDir=checkNCreateDirs(hdfsDestDir, conf);
+			
+			if(checkOrCreateDir)
 			{
-				hdfs.mkdirs(destDirPath);
-			}
+			
 			final String fileName=FileUtil.getFileNameWithExt(hdfsInputFile);
 			
 			final String renamedFileName=hdfsDestDir+HDFSConstants.FILE_SEPARATOR_VALUE.getValue()+fileName;
@@ -180,6 +182,7 @@ public class HDFSUtil {
 			   }
 		}else{
 			throw new InvalidArgException("invalid input arguments found: hdfsinputloc:"+hdfsInputFile+" hdfsOutputLoc:"+hdfsDestDir+" removeInputLoc:"+removeInputLoc+" conf:"+conf);
+		}
 		}
 		return Boolean.TRUE;
 	}
@@ -246,11 +249,26 @@ public class HDFSUtil {
 		return isDirFilesMoved;
 	}
 	
-	public static boolean mkdirs(final String hdfsDirs, boolean isOverWrite, final Configuration conf)
+	public static boolean checkNCreateDirs(final String fileSystemDirs, final Configuration conf) throws IOException
 	{
+		boolean isFileSystemExistOrCreateDirs=Boolean.FALSE;
+		FileSystem hdfs = getFileSystem(conf);
+		
+		if(hdfs!=null)
+		{
+			Path fileSystemPath=new Path(fileSystemDirs);
+			if(!hdfs.exists(fileSystemPath))
+			{
+					isFileSystemExistOrCreateDirs=hdfs.mkdirs(fileSystemPath);
+					logger.debug(" Is File System Directories+"+fileSystemDirs+" Created ? "+isFileSystemExistOrCreateDirs);
+			}else{
+				isFileSystemExistOrCreateDirs=Boolean.TRUE;
+				logger.debug(" Is File System Directories+"+fileSystemDirs+" Exists ? "+isFileSystemExistOrCreateDirs);
+			}
+		}
 		
 		
-		return Boolean.FALSE;
+		return isFileSystemExistOrCreateDirs;
 	}
 	
 	public static FileSystem getFileSystem(final Configuration conf) throws IOException
